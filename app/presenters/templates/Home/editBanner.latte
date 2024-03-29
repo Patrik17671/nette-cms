@@ -1,0 +1,15 @@
+{layout '../@layout.latte'}
+{control sidebar}
+
+
+{block content}
+
+    <h1>{$banner->title}</h1>
+
+    {control bannerForm}
+
+    {if $banner->image_path}
+        <img src="{$banner->image_path}" alt="Banner image">
+    {/if}
+{/block}
+

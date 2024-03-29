@@ -1,0 +1,36 @@
+{layout '../@layout.latte'}
+{control sidebar}
+
+
+{block content}
+
+    <h1>Banners</h1>
+
+    <div class="banners">
+        {if count($banners) > 0}
+            {foreach $banners as $banner}
+                <div class="banner" id="banner-{$banner->id}">
+                    <div class="banner-view">
+                        <h2>{$banner->title}</h2>
+                        {if $banner->image_path}
+                            <img src="{$banner->image_path}" alt="Banner image">
+                        {/if}
+                        <a class="edit-btn" data-banner-id="{$banner->id}" href="{link 'Home:editBanner', 'bannerId' => $banner->id}">Edit</a>
+                        <a class="edit-btn" data-banner-id="{$banner->id}" href="{link 'Home:deleteBanner', 'bannerId' => $banner->id}">Delete</a>
+                    </div>
+                    <div class="banner-edit-form" style="display: none;">
+                        {control bannerForm}
+                    </div>
+                </div>
+            {/foreach}
+        {else}
+            <p>0 banners</p>
+        {/if}
+    </div>
+
+    <div class="banner-form">
+        <h2>Add new banner</h2>
+        {control bannerForm}
+    </div>
+{/block}
+
