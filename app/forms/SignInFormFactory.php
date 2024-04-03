@@ -9,10 +9,14 @@
         {
             $form = new Form;
             $form->addText('username', 'Username:')
-                ->setRequired('Please enter your username.');
+                ->setRequired('Please enter your username.')
+                ->setHtmlAttribute('class', 'form-control');
             $form->addPassword('password', 'Password:')
-                ->setRequired('Please enter your password.');
-            $form->addSubmit('send', 'Sign in');
+                ->setRequired('Please enter your password.')
+                ->setHtmlAttribute('class', 'form-control');
+            $form->addSubmit('send', 'Sign in')
+                ->setHtmlAttribute('class', 'btn btn-primary mt-3');
+            $form->setHtmlAttribute('class', 'card-body');
 
             return $form;
         }

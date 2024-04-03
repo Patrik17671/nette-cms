@@ -1,2 +1,8 @@
 /app/config/*
 create-admin.php
+/config/common.neon
+/config/services.neon
+/log/
+/bin/
+/temp/
+/vendor/

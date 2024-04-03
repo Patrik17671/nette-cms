@@ -5,6 +5,8 @@
 	<meta name="viewport" content="width=device-width">
 
 	<title>{ifset title}{include title|stripHtml} | {/ifset}Spilus Nette CMS</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/dist/css/main.css">
 </head>
 
 <body>
@@ -12,9 +14,23 @@
 	{block scripts}
         <script src="https://unpkg.com/nette-forms@3/src/assets/netteForms.js"></script>
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
 	{/block}
 
-	{include content}
+    {include 'components/header.latte'}
+
+    <div class="container container-fluid py-5">
+        <div class="row">
+            <div class="col-md-3 col-lg-2 d-none d-md-block bg-light sidebar">
+                {control sidebar}
+            </div>
+            <div class="col-md-9 ml-sm-auto col-lg-10 px-4">
+                {include content}
+            </div>
+        </div>
+    </div>
+
+    {include 'components/footer.latte'}
 
 </body>
 </html>
