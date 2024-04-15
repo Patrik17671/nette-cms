@@ -21,12 +21,18 @@
 
     <div class="container container-fluid py-5">
         <div class="row">
-            <div class="col-md-3 col-lg-2 d-none d-md-block bg-light sidebar">
-                {control sidebar}
-            </div>
-            <div class="col-md-9 ml-sm-auto col-lg-10 px-4">
-                {include content}
-            </div>
+            {if $user->isLoggedIn()}
+                <div class="col-md-3 col-lg-2 d-none d-md-block bg-light sidebar">
+                    {control sidebar}
+                </div>
+                <div class="col-md-9 ml-sm-auto col-lg-10 px-4">
+                    {include content}
+                </div>
+            {else}
+                <div class="col-12">
+                    {include content}
+                </div>
+            {/if}
         </div>
     </div>
 

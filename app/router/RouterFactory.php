@@ -7,7 +7,6 @@ namespace App\Router;
 use Nette;
 use Nette\Application\Routers\RouteList;
 
-
 final class RouterFactory
 {
 	use Nette\StaticClass;
@@ -15,6 +14,9 @@ final class RouterFactory
 	public static function createRouter(): RouteList
 	{
 		$router = new RouteList;
+
+        $router->addRoute('api/v1/banners[/<id>]', 'Api:banners');
+
         $router->addRoute('sign/in', 'Sign:in');
         $router->addRoute('banner/edit/<bannerId>', 'Home:editBanner');
         $router->addRoute('banners', 'Home:banners');

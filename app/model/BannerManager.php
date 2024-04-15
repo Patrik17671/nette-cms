@@ -15,40 +15,63 @@ class BannerManager
     public function addBanner($title, $url, $imageURL, $location): void
     {
         // write to DB
-        $this->database->table('banners')->insert([
-            'title' => $title,
-            'url' => $url,
-            'image_path' => $imageURL,
-            'location' => $location
-        ]);
+        try {
+            $this->database->table('banners')->insert([
+                'title' => $title,
+                'url' => $url,
+                'image_path' => $imageURL,
+                'location' => $location
+            ]);
+        } catch (\Nette\Database\DriverException $e) {
+            throw new \Exception("Database error: " . $e->getMessage());
+        }
     }
 
-    public function getBanners(): array
+    public function getBanners($location = null): array
     {
-        // load from DB
-        return $this->database->table('banners')->fetchAll();
+        try {
+            $selection = $this->database->table('banners');
+            if ($location !== null) {
+                $selection->where('location', $location);
+            }
+            return $selection->fetchAll();
+        } catch (\Nette\Database\DriverException $e) {
+            throw new \Exception("Database error: " . $e->getMessage());
+        }
     }
 
     //Get current banner
     public function getBannerById($id)
     {
-        return $this->database->table('banners')->get($id);
+        try {
+            return $this->database->table('banners')->get($id);
+        } catch (\Nette\Database\DriverException $e) {
+            throw new \Exception("Database error: " . $e->getMessage());
+        }
     }
 
     //update banner
     public function updateBanner($id, $title, $url, $imageURL, $location)
     {
-        $this->database->table('banners')->where('id', $id)->update([
-            'title' => $title,
-            'url' => $url,
-            'image_path' => $imageURL,
-            'location' => $location
-        ]);
+        try {
+            $this->database->table('banners')->where('id', $id)->update([
+                'title' => $title,
+                'url' => $url,
+                'image_path' => $imageURL,
+                'location' => $location
+            ]);
+        } catch (\Nette\Database\DriverException $e) {
+            throw new \Exception("Database error: " . $e->getMessage());
+        }
     }
 
     //delete
     public function deleteBanner($id): void
     {
-        $this->database->table('banners')->where('id', $id)->delete();
+        try {
+            $this->database->table('banners')->where('id', $id)->delete();
+        } catch (\Nette\Database\DriverException $e) {
+            throw new \Exception("Database error: " . $e->getMessage());
+        }
     }
 }
