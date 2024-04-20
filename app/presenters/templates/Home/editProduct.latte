@@ -1,0 +1,13 @@
+{layout '../@layout.latte'}
+
+{block content}
+
+    <h1>{$product->name}</h1>
+
+    {control productForm}
+
+    {if $product->image}
+        <img src="{$product->image}" alt="Product image">
+    {/if}
+{/block}
+

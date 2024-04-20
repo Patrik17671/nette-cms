@@ -9,6 +9,7 @@ class BannerFormFactory implements IBannerFormFactory
     {
         $form = new Form;
 
+        $form->addHidden('id');
         $form->addText('title', 'Title')
             ->setHtmlAttribute('class', 'form-control')
             ->setRequired('Please enter your title.');

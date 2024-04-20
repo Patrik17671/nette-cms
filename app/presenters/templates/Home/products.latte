@@ -1,1 +1,49 @@
-<h1>toto su produkty</h1>
+{layout '../@layout.latte'}
+
+{block content}
+    <h1 class="mb-4">Products</h1>
+
+    <div class="product-form my-5">
+        <h2>Add new product</h2>
+        <div class="card">
+            <div class="card-body">
+                {control productForm}
+            </div>
+        </div>
+    </div>
+
+    <div class="products">
+        {if count($products) > 0}
+            {foreach $products as $product}
+                <div class="mb-4">
+                    <div class="card product" id="banner-{$product->id}">
+                        {if $product->image}
+                            <img src="{$product->image}" class="card-img-top mb-3" alt="Banner image">
+                        {/if}
+                        <div class="card-body">
+                            <h5 class="card-title">{$product->name}</h5>
+                            {if $product->description}
+                                <p class="card-text">{$product->description}</p>
+                            {/if}
+                            <div class="card-text mb-3">
+                                {if $product->price}
+                                    <strong>Price:</strong> {$product->price} <br>
+                                {/if}
+                                {if $product->sizes}
+                                    <strong>Sizes:</strong> {$product->sizes} <br>
+                                {/if}
+                                {if $product->colors}
+                                    <strong>Colors:</strong> {$product->colors}
+                                {/if}
+                            </div>
+                            <a href="{link 'Home:editProduct', 'productId' => $product->id}" class="btn btn-primary">Edit</a>
+                            <a href="{link 'Home:deleteProduct', 'productId' => $product->id}" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this product?');">Delete</a>
+                        </div>
+                    </div>
+                </div>
+            {/foreach}
+        {else}
+            <p class="text-center">No products available</p>
+        {/if}
+    </div>
+{/block}
