@@ -14,6 +14,7 @@ class ProductManager
 
     public function addProduct($name, $url, $imageURL, $description, $sizes, $colors, $price): void
     {
+        $colorsJson = json_encode($colors);
         // write to DB
         try {
             $this->database->table('products')->insert([
@@ -22,7 +23,7 @@ class ProductManager
                 'image' => $imageURL,
                 'description' => $description,
                 'sizes' => $sizes,
-                'colors' => $colors,
+                'colors' => $colorsJson,
                 'price' => $price,
             ]);
         } catch (\Nette\Database\DriverException $e) {
@@ -56,6 +57,7 @@ class ProductManager
     //update Product
     public function updateProduct($id, $name, $url, $imageURL, $description, $sizes, $colors, $price)
     {
+        $colorsJson = json_encode($colors);
         try {
             $this->database->table('products')->where('id', $id)->update([
                 'name' => $name,
@@ -63,7 +65,7 @@ class ProductManager
                 'image' => $imageURL,
                 'description' => $description,
                 'sizes' => $sizes,
-                'colors' => $colors,
+                'colors' => $colorsJson,
                 'price' => $price,
             ]);
         } catch (\Nette\Database\DriverException $e) {
