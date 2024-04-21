@@ -6,26 +6,40 @@ use Nette;
 use Nette\Application\UI\Form;
 use App\Forms\BannerFormFactory;
 use App\Forms\ProductFormFactory;
+use App\Forms\ColorsFormFactory;
 use App\model\BannerManager;
 use App\Model\ProductManager;
+use App\Model\ColorsManager;
 use App\Components\CloudinaryUploader;
 
 final class HomePresenter extends Nette\Application\UI\Presenter
 {
 
     private $bannerFormFactory;
+    private $colorsFormFactory;
     private $bannerManager;
     private $productManager;
+    private $colorsManager;
     private $cloudinaryUploader;
 
     private $productFormFactory;
 
-    public function __construct(BannerFormFactory $bannerFormFactory,ProductFormFactory $productFormFactory,BannerManager $bannerManager,ProductManager $productManager,CloudinaryUploader $cloudinaryUploader)
+    public function __construct(
+        BannerFormFactory $bannerFormFactory,
+        ProductFormFactory $productFormFactory,
+        ColorsFormFactory $colorsFormFactory,
+        BannerManager $bannerManager,
+        ProductManager $productManager,
+        ColorsManager $colorsManager,
+        CloudinaryUploader $cloudinaryUploader
+    )
     {
         $this->bannerFormFactory = $bannerFormFactory;
         $this->productFormFactory = $productFormFactory;
+        $this->colorsFormFactory = $colorsFormFactory;
         $this->bannerManager = $bannerManager;
         $this->productManager = $productManager;
+        $this->colorsManager = $colorsManager;
         $this->cloudinaryUploader = $cloudinaryUploader;
     }
 
@@ -215,6 +229,74 @@ final class HomePresenter extends Nette\Application\UI\Presenter
 
         $this->redirect('Home:products');
     }
+
+    public function renderColors(): void
+    {
+        $colors = $this->colorsManager->getColors();
+        $this->template->colors = $colors;
+    }
+
+    protected function createComponentColorsForm(): Form
+    {
+        $colorId = $this->getParameter('colorId');
+
+        $colorData = null;
+        if ($colorId) {
+            $colorData = $this->colorsManager->getColorById($colorId);
+            if (!$colorData) {
+                $this->error('Color not found.');
+            }
+        }
+
+        //Create form
+        $form = $this->colorsFormFactory->create($colorData);
+
+        //Callback from bannerFrom
+        $form->onSuccess[] = [$this, 'colorsFormSucceeded'];
+
+        return $form;
+    }
+
+    public function colorsFormSucceeded(Form $form, \stdClass $values): void
+    {
+        $colorId = $values->id;
+
+        if(!empty($colorId)){
+            $this->colorsManager->updateColor($colorId,$values->name, $values->value);
+        }else{
+            $this->colorsManager->addColor($values->name, $values->value);
+        }
+
+        $this->flashMessage('Operation success');
+        $this->redirect('this');
+    }
+
+    public function actionEditColor($colorId): void
+    {
+        $color = $this->colorsManager->getColorById($colorId);
+        if (!$color) {
+            $this->error('Color not found.');
+        }
+
+        $this['colorsForm']->setDefaults([
+            'name' => $color->name,
+            'value' => $color->value,
+        ]);
+
+        $this->template->product = $color;
+    }
+
+    public function actionDeleteColor($colorId): void
+    {
+        if ($this->colorsManager->deleteProduct($colorId)) {
+            $this->flashMessage('The color has been successfully deleted.');
+        } else {
+            $this->flashMessage('Failed to delete color.', 'error');
+        }
+
+        $this->redirect('Home:colors');
+    }
+
 
     protected function createComponentSidebar(): \App\Components\Sidebar\SidebarControl
     {

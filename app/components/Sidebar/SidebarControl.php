@@ -12,6 +12,7 @@ class SidebarControl extends Control
         $this->template->items = [
             'Banners' => $this->getPresenter()->link('Home:banners'),
             'Products' => $this->getPresenter()->link('Home:products'),
+            'Colors' => $this->getPresenter()->link('Home:colors'),
         ];
 
         $this->template->currentAction = $presenter->getAction();

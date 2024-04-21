@@ -1,0 +1,34 @@
+{layout '../@layout.latte'}
+
+{block content}
+
+    <h1 class="mb-4">Colors</h1>
+
+    <div class="banner-form my-5">
+        <h2>Add new color</h2>
+        <div class="card">
+            <div class="card-body">
+                {control colorsForm}
+            </div>
+        </div>
+    </div>
+
+    <div class="banners">
+        {if count($colors) > 0}
+            {foreach $colors as $color}
+                <div class="mb-4">
+                    <div class="card color" id="color-{$color->id}">
+                        <div class="card-body">
+                            <h5 class="card-title">{$color->name}</h5>
+                            <a href="{link 'Home:editColor', 'colorId' => $color->id}" class="btn btn-primary">Edit</a>
+                            <a href="{link 'Home:deleteColor', 'colorId' => $color->id}" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this color?');">Delete</a>
+                        </div>
+                    </div>
+                </div>
+            {/foreach}
+        {else}
+            <p class="text-center">No colors available</p>
+        {/if}
+    </div>
+
+{/block}
