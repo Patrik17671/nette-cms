@@ -7,9 +7,11 @@ use Nette\Application\UI\Form;
 use App\Forms\BannerFormFactory;
 use App\Forms\ProductFormFactory;
 use App\Forms\ColorsFormFactory;
+use App\Forms\CategoriesFormFactory;
 use App\model\BannerManager;
 use App\Model\ProductManager;
 use App\Model\ColorsManager;
+use App\Model\CategoriesManager;
 use App\Components\CloudinaryUploader;
 
 final class HomePresenter extends Nette\Application\UI\Presenter
@@ -17,9 +19,11 @@ final class HomePresenter extends Nette\Application\UI\Presenter
 
     private $bannerFormFactory;
     private $colorsFormFactory;
+    private $categoriesFormFactory;
     private $bannerManager;
     private $productManager;
     private $colorsManager;
+    private $categoriesManager;
     private $cloudinaryUploader;
 
     private $productFormFactory;
@@ -28,18 +32,22 @@ final class HomePresenter extends Nette\Application\UI\Presenter
         BannerFormFactory $bannerFormFactory,
         ProductFormFactory $productFormFactory,
         ColorsFormFactory $colorsFormFactory,
+        CategoriesFormFactory $categoriesFormFactory,
         BannerManager $bannerManager,
         ProductManager $productManager,
         ColorsManager $colorsManager,
+        CategoriesManager $categoriesManager,
         CloudinaryUploader $cloudinaryUploader
     )
     {
         $this->bannerFormFactory = $bannerFormFactory;
         $this->productFormFactory = $productFormFactory;
         $this->colorsFormFactory = $colorsFormFactory;
+        $this->categoriesFormFactory = $categoriesFormFactory;
         $this->bannerManager = $bannerManager;
         $this->productManager = $productManager;
         $this->colorsManager = $colorsManager;
+        $this->categoriesManager = $categoriesManager;
         $this->cloudinaryUploader = $cloudinaryUploader;
     }
 
@@ -122,12 +130,6 @@ final class HomePresenter extends Nette\Application\UI\Presenter
             $this->error('Banner not found.');
         }
 
-        $this['bannerForm']->setDefaults([
-            'title' => $banner->title,
-            'url' => $banner->url,
-            'location' => $banner->location,
-        ]);
-
         $this->template->banner = $banner;
     }
 
@@ -190,9 +192,9 @@ final class HomePresenter extends Nette\Application\UI\Presenter
         }
 
         if(!empty($productId)){
-            $this->productManager->updateProduct($productId,$values->name, $url, $imageURL, $values->description, $values->sizes, $values->colors, $values->price);
+            $this->productManager->updateProduct($productId,$values->name, $url, $imageURL, $values->description, $values->sizes, $values->colors, $values->price, $values->categories);
         }else{
-            $this->productManager->addProduct($values->name, $url, $imageURL, $values->description, $values->sizes, $values->colors, $values->price);
+            $this->productManager->addProduct($values->name, $url, $imageURL, $values->description, $values->sizes, $values->colors, $values->price, $values->categories);
         }
 
         $this->flashMessage('Operation success');
@@ -205,16 +207,6 @@ final class HomePresenter extends Nette\Application\UI\Presenter
         if (!$product) {
             $this->error('Product not found.');
         }
-
-        $this['productForm']->setDefaults([
-            'name' => $product->name,
-            'url' => $product->url,
-            'description' => $product->description,
-            'sizes' => $product->sizes,
-            'categories' => $product->categories,
-            'colors' => $product->colors,
-            'price' => $product->price,
-        ]);
 
         $this->template->product = $product;
     }
@@ -278,23 +270,80 @@ final class HomePresenter extends Nette\Application\UI\Presenter
             $this->error('Color not found.');
         }
 
-        $this['colorsForm']->setDefaults([
-            'name' => $color->name,
-            'value' => $color->value,
-        ]);
-
-        $this->template->product = $color;
+        $this->template->color = $color;
     }
 
     public function actionDeleteColor($colorId): void
     {
-        if ($this->colorsManager->deleteProduct($colorId)) {
+        if ($this->colorsManager->deleteColor($colorId)) {
             $this->flashMessage('The color has been successfully deleted.');
         } else {
             $this->flashMessage('Failed to delete color.', 'error');
         }
 
         $this->redirect('Home:colors');
+    }
+
+    public function renderCategories(): void
+    {
+        $categories = $this->categoriesManager->getCategories();
+        $this->template->categories = $categories;
+    }
+
+    protected function createComponentCategoriesForm(): Form
+    {
+        $categoryId = $this->getParameter('categoryId');
+
+        $categoryData = null;
+        if ($categoryId) {
+            $categoryData = $this->categoriesManager->getCategoryById($categoryId);
+            if (!$categoryData) {
+                $this->error('Category not found.');
+            }
+        }
+
+        //Create form
+        $form = $this->categoriesFormFactory->create($categoryData);
+
+        //Callback from categoriesFrom
+        $form->onSuccess[] = [$this, 'categoriesFormSucceeded'];
+
+        return $form;
+    }
+
+    public function categoriesFormSucceeded(Form $form, \stdClass $values): void
+    {
+        $categoryId = $values->id;
+
+        if(!empty($categoryId)){
+            $this->categoriesManager->updateCategory($categoryId,$values->title,$values->url, $values->value,$values->description);
+        }else{
+            $this->categoriesManager->addCategory($values->title,$values->url, $values->value,$values->description);
+        }
+
+        $this->flashMessage('Operation success');
+        $this->redirect('this');
+    }
+
+    public function actionEditCategory($categoryId): void
+    {
+        $category = $this->categoriesManager->getCategoryById($categoryId);
+        if (!$category) {
+            $this->error('Category not found.');
+        }
+
+        $this->template->category = $category;
+    }
+
+    public function actionDeleteCategory($categoryId): void
+    {
+        if ($this->categoriesManager->deleteCategory($categoryId)) {
+            $this->flashMessage('The category has been successfully deleted.');
+        } else {
+            $this->flashMessage('Failed to delete category.', 'error');
+        }
+
+        $this->redirect('Home:categories');
     }
 
 

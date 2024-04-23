@@ -59,7 +59,7 @@ class ColorsManager
     }
 
     //delete
-    public function deleteColors($id): void
+    public function deleteColor($id): void
     {
         try {
             $this->database->table('colors')->where('id', $id)->delete();
