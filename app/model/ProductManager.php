@@ -12,9 +12,10 @@ class ProductManager
         $this->database = $database;
     }
 
-    public function addProduct($name, $url, $imageURL, $description, $sizes, $colors, $price): void
+    public function addProduct($name, $url, $imageURL, $description, $sizes, $colors, $price, $categories): void
     {
         $colorsJson = json_encode($colors);
+        $categoriesJson = json_encode($categories);
         // write to DB
         try {
             $this->database->table('products')->insert([
@@ -24,6 +25,7 @@ class ProductManager
                 'description' => $description,
                 'sizes' => $sizes,
                 'colors' => $colorsJson,
+                'categories' => $categoriesJson,
                 'price' => $price,
             ]);
         } catch (\Nette\Database\DriverException $e) {
@@ -31,13 +33,28 @@ class ProductManager
         }
     }
 
-    public function getProducts($location = null): array
+    public function getProducts($params = null): array
     {
         try {
             $selection = $this->database->table('products');
-            if ($location !== null) {
-                $selection->where('location', $location);
+
+            if (!empty($params['category'])) {
+                $categoryJson = json_encode([$params['category']]);
+                $selection->where('json_contains(categories, ?)', $categoryJson);
             }
+
+            if (!empty($params['colors'])) {
+                $colorsJson = json_encode([$params['colors']]);
+                $selection->where('json_contains(colors, ?)', $colorsJson);
+            }
+
+            if (!empty($params['sizes'])) {
+                $sizes = explode(',', $params['sizes']);
+                foreach ($sizes as $size) {
+                    $selection->where('sizes LIKE ?', "%$size%");
+                }
+            }
+
             return $selection->fetchAll();
         } catch (\Nette\Database\DriverException $e) {
             throw new \Exception("Database error: " . $e->getMessage());
@@ -55,9 +72,10 @@ class ProductManager
     }
 
     //update Product
-    public function updateProduct($id, $name, $url, $imageURL, $description, $sizes, $colors, $price)
+    public function updateProduct($id, $name, $url, $imageURL, $description, $sizes, $colors, $price, $categories)
     {
         $colorsJson = json_encode($colors);
+        $categoriesJson = json_encode($categories);
         try {
             $this->database->table('products')->where('id', $id)->update([
                 'name' => $name,
@@ -66,6 +84,7 @@ class ProductManager
                 'description' => $description,
                 'sizes' => $sizes,
                 'colors' => $colorsJson,
+                'categories' => $categoriesJson,
                 'price' => $price,
             ]);
         } catch (\Nette\Database\DriverException $e) {

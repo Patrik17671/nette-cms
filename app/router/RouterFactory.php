@@ -19,10 +19,6 @@ final class RouterFactory
         $router->addRoute('api/v1/products[/<id>]', 'Api:products');
 
         $router->addRoute('sign/in', 'Sign:in');
-        $router->addRoute('banner/edit/<bannerId>', 'Home:editBanner');
-        $router->addRoute('banners', 'Home:banners');
-        $router->addRoute('products', 'Home:products');
-        $router->addRoute('colors', 'Home:colors');
 		$router->addRoute('<presenter>/<action>[/<id>]', 'Home:default');
 		return $router;
 	}

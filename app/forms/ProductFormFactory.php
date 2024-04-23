@@ -3,14 +3,18 @@ namespace App\Forms;
 
 use Nette\Application\UI\Form;
 use App\Model\ColorsManager;
+use App\Model\CategoriesManager;
+use Tracy\Debugger;
 
 class ProductFormFactory implements IProductFormFactory
 {
 
     private $colorsManager;
+    private $categoriesManager;
 
-    public function __construct(ColorsManager $colorsManager) {
+    public function __construct(ColorsManager $colorsManager, CategoriesManager $categoriesManager) {
         $this->colorsManager = $colorsManager;
+        $this->categoriesManager = $categoriesManager;
     }
 
     public function create($ProductData = null): Form
@@ -22,6 +26,11 @@ class ProductFormFactory implements IProductFormFactory
             $colorsOptions[$color->value] = $color->name;
         }
 
+        $categories = $this->categoriesManager->getCategories();
+        $categoriesOptions = [];
+        foreach ($categories as $category) {
+            $categoriesOptions[$category->value] = $category->title;
+        }
 
         $form->addHidden('id');
         $form->addText('name', 'Name')
@@ -35,8 +44,8 @@ class ProductFormFactory implements IProductFormFactory
             ->setHtmlAttribute('class', 'form-control');
         $form->addText('sizes', 'Sizes')
             ->setHtmlAttribute('class', 'form-control');
-        $form->addText('categories', 'Categories')
-            ->setHtmlAttribute('class', 'form-control');
+        $form->addMultiSelect('categories', 'Categories', $categoriesOptions)
+            ->setHtmlAttribute('class', 'form-control selectpicker');
         $form->addMultiSelect('colors', 'Colors', $colorsOptions)
             ->setHtmlAttribute('class', 'form-control selectpicker');
         $form->addFloat('price', 'Price')
@@ -47,13 +56,22 @@ class ProductFormFactory implements IProductFormFactory
             ->setHtmlAttribute('class', 'btn btn-primary');
 
         if ($ProductData) {
+            $colors = json_decode($ProductData->colors, true);
+            if (!is_array($colors)) {
+                $colors = [];
+            }
+            $categories = json_decode($ProductData->categories, true);
+            if (!is_array($categories)) {
+                $categories = [];
+            }
+
             $form->setDefaults([
                 'id' => $ProductData->id,
                 'name' => $ProductData->name,
                 'description' => $ProductData->description,
                 'sizes' => $ProductData->sizes,
-                'categories' => $ProductData->categories,
-                'colors' => $ProductData->colors,
+                'categories' => $categories,
+                'colors' => $colors,
                 'price' => $ProductData->price,
             ]);
         }
