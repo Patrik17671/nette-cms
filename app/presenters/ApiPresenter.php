@@ -66,6 +66,8 @@
         public function actionProducts($id = null): void
         {
             $this->setLayout(FALSE);
+            $page = $this->getHttpRequest()->getQuery('page') ?: 1;
+            $perPage = $this->getHttpRequest()->getQuery('perPage') ?: 10;
             $searchParams = [
                 'category' => $this->getHttpRequest()->getQuery('category'),
                 'sizes' => $this->getHttpRequest()->getQuery('sizes'),
@@ -80,27 +82,34 @@
                     return;
                 }
 
-                $productData = $this->formatBannerData($product);
+                $productData = $this->formatProductData($product);
                 $this->sendJson($productData);
             }
             else {
                 if (!empty($searchParams)) {
-                    $products = $this->productManager->getProducts($searchParams);
-                    if (empty($products)) {
+                    $results = $this->productManager->getProducts($searchParams, $page, $perPage);
+                    if (empty($results)) {
                         $this->sendJson(['error' => 'No products found matching the criteria']);
                         return;
                     }
                 } else {
-                    $products = $this->productManager->getProducts();
-                    if (empty($products)) {
+                    $results = $this->productManager->getProducts($searchParams, $page, $perPage);
+                    if (empty($results)) {
                         $this->sendJson(['error' => 'No products found']);
                         return;
                     }
                 }
 
-                $productsData = array_map([$this, 'formatProductData'], $products);
+                $productsData = array_map([$this, 'formatProductData'], $results['products']);
                 $productsData = array_values($productsData);
-                $this->sendJson($productsData);
+                $responseData = [
+                    'products' => $productsData,
+                    'page' => $results['page'],
+                    'totalPages' => $results['totalPages'],
+                    'perPage' => $results['perPage'],
+                    'totalItems' => $results['totalItems'],
+                ];
+                $this->sendJson($responseData);
             }
         }
 

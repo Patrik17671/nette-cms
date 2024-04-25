@@ -33,7 +33,7 @@ class ProductManager
         }
     }
 
-    public function getProducts($params = null): array
+    public function getProducts($params = null, $page = 1, $perPage = 10): array
     {
         try {
             $selection = $this->database->table('products');
@@ -55,7 +55,20 @@ class ProductManager
                 }
             }
 
-            return $selection->fetchAll();
+            $totalProducts = $selection->count('*');
+            $totalPages = ceil($totalProducts / $perPage);
+            $selection->limit($perPage, ($page - 1) * $perPage);
+
+            $products = $selection->fetchAll();
+
+            return [
+                'products' => $products,
+                'page' => $page,
+                'totalPages' => $totalPages,
+                'perPage' => $perPage,
+                'totalItems' => $totalProducts,
+            ];
+
         } catch (\Nette\Database\DriverException $e) {
             throw new \Exception("Database error: " . $e->getMessage());
         }
