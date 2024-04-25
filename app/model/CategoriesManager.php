@@ -72,4 +72,23 @@ class CategoriesManager
         }
     }
 
+    public function formatCategories($selectedCategoryValues): array {
+        $categories = $this->getCategories();
+        $formattedCategories = [];
+        $selectedCategoryValuesArray = is_string($selectedCategoryValues) ? json_decode($selectedCategoryValues, true) : $selectedCategoryValues;
+
+        foreach ($categories as $category) {
+            if (in_array($category->value, $selectedCategoryValuesArray)) {
+                $formattedCategories[] = [
+                    'id' => $category->id,
+                    'title' => $category->title,
+                    'value' => $category->value,
+                    'description' => $category->description,
+                ];
+            }
+        }
+
+        return $formattedCategories;
+    }
+
 }
