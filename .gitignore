@@ -6,3 +6,4 @@ create-admin.php
 /bin/
 /temp/
 /vendor/
+/.env

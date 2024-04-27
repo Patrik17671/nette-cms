@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App;
 
 use Nette\Bootstrap\Configurator;
+use Dotenv\Dotenv;
 
 
 class Bootstrap
@@ -13,6 +14,9 @@ class Bootstrap
 	{
 		$configurator = new Configurator;
 		$appDir = dirname(__DIR__);
+
+        $dotenv = Dotenv::createImmutable($appDir);
+        $dotenv->load();
 
 		//$configurator->setDebugMode('secret@23.75.345.200'); // enable for your remote IP
 		$configurator->enableTracy($appDir . '/log');

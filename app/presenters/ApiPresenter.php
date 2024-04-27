@@ -27,6 +27,21 @@
             $this->categoriesManager = $categoriesManager;
         }
 
+        public function startup(): void
+        {
+            parent::startup();
+            $this->checkApiToken();
+        }
+
+        private function checkApiToken(): void
+        {
+            $token = $this->getHttpRequest()->getHeader('Authorization');
+            if (!$token || $token !== 'Bearer ' . $_ENV['API_TOKEN']) {
+                $this->sendJson(['error' => 'Unauthorized'], Nette\Http\IResponse::S403_FORBIDDEN);
+                $this->terminate();
+            }
+        }
+
         public function actionBanners($id = null): void
         {
             $this->setLayout(FALSE);
