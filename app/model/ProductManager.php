@@ -2,14 +2,76 @@
 namespace App\Model;
 
 use Nette\Database\Context;
+use Elastic\Elasticsearch\Client as ElasticsearchClient;
 
 class ProductManager
 {
     private $database;
+    private $client;
 
-    public function __construct(Context $database)
+    public function __construct(Context $database, ElasticsearchClient $client)
     {
         $this->database = $database;
+        $this->client = $client;
+    }
+
+    public function searchProducts(array $searchParams, int $page, int $perPage)
+    {
+        $params = [
+            'index' => 'products',
+            'body'  => [
+                'from' => ($page - 1) * $perPage,
+                'size' => $perPage,
+                'query' => [
+                    'bool' => [
+                        'must' => []
+                    ]
+                ]
+            ]
+        ];
+
+        foreach ($searchParams as $key => $value) {
+            if ($key === 'category' || $key === 'sizes' || $key === 'colors') {
+                if (in_array($key, ['colors', 'categories'])) {
+                    $value = json_encode(explode(',', $value));
+                }
+                if (in_array($key, ['sizes'])) {
+                    $value = (explode(',', $value));
+                    print_r($value);
+                    die();
+                }
+
+                $queryType = (in_array($key, ['sizes'])) ? 'terms' : 'term';
+                $params['body']['query']['bool']['must'][] = [
+                    $queryType => [
+                        $key => $value
+                    ]
+                ];
+            }
+        }
+
+        $response = $this->client->search($params);
+        $totalItems = $response['hits']['total']['value'];
+        $totalPages = ceil($totalItems / $perPage);
+
+        $results = $this->formatSearchResults($response);
+
+        return [
+            'products' => $results,
+            'page' => $page,
+            'totalPages' => $totalPages,
+            'perPage' => $perPage,
+            'totalItems' => $totalItems
+        ];
+    }
+
+    private function formatSearchResults($response)
+    {
+        $results = [];
+        foreach ($response['hits']['hits'] as $hit) {
+            $results[] = $hit['_source'];
+        }
+        return $results;
     }
 
     public function addProduct($name, $url, $imageURL, $description, $sizes, $colors, $price, $categories): void

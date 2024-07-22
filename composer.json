@@ -21,8 +21,10 @@
 		"tracy/tracy": "^2.10",
 		"cloudinary/cloudinary_php": "^2.13",
 		"nextras/migrations": "^3.3",
-		"vlucas/phpdotenv": "^5.6"
-	},
+		"vlucas/phpdotenv": "^5.6",
+		"elasticsearch/elasticsearch": "^8.13",
+        "ext-pdo": "*"
+    },
 	"require-dev": {
 		"nette/tester": "^2.5",
 		"symfony/thanks": "^1"
@@ -35,7 +37,8 @@
 	"minimum-stability": "stable",
 	"config": {
 		"allow-plugins": {
-			"symfony/thanks": true
+			"symfony/thanks": true,
+			"php-http/discovery": true
 		}
 	}
 }

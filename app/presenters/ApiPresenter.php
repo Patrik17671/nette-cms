@@ -82,7 +82,7 @@
         {
             $this->setLayout(FALSE);
             $page = $this->getHttpRequest()->getQuery('page') ?: 1;
-            $perPage = $this->getHttpRequest()->getQuery('perPage') ?: 10;
+            $perPage = $this->getHttpRequest()->getQuery('perPage') ?: 5;
             $searchParams = [
                 'category' => $this->getHttpRequest()->getQuery('category'),
                 'sizes' => $this->getHttpRequest()->getQuery('sizes'),
@@ -102,13 +102,13 @@
             }
             else {
                 if (!empty($searchParams)) {
-                    $results = $this->productManager->getProducts($searchParams, $page, $perPage);
+                    $results = $this->productManager->searchProducts($searchParams, $page, $perPage);
                     if (empty($results)) {
                         $this->sendJson(['error' => 'No products found matching the criteria']);
                         return;
                     }
                 } else {
-                    $results = $this->productManager->getProducts($searchParams, $page, $perPage);
+                    $results = $this->productManager->searchProducts($searchParams, $page, $perPage);
                     if (empty($results)) {
                         $this->sendJson(['error' => 'No products found']);
                         return;
@@ -142,24 +142,25 @@
         private function formatProductData($product): array
         {
             $colorsObjects = null;
-            if($product->colors){
-                $colorsObjects = $this->colorsManager->formatColors($product->colors);
+            if (isset($product['colors']) && !empty($product['colors'])) {
+                $colorsObjects = $this->colorsManager->formatColors($product['colors']);
             }
+
             $categoriesObjects = null;
-            if($product->categories){
-                $categoriesObjects = $this->categoriesManager->formatCategories($product->categories);
+            if (isset($product['categories']) && !empty($product['categories'])) {
+                $categoriesObjects = $this->categoriesManager->formatCategories($product['categories']);
             }
 
             return [
-                'id' => $product->id,
-                'name' => $product->name,
-                'url' => $product->url,
-                'image' => $product->image,
-                'description' => $product->description,
-                'sizes' => $product->sizes,
-                'categories' => $categoriesObjects,
+                'id' => $product['id'],
+                'name' => $product['name'],
+                'description' => $product['description'],
+                'image' => $product['image'],
+                'url' => $product['url'],
+                'price' => $product['price'],
+                'sizes' => explode(',', $product['sizes']),
                 'colors' => $colorsObjects,
-                'price' => $product->price
+                'categories' => $categoriesObjects
             ];
         }
     }
